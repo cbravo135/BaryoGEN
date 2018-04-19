@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     //read arguements and do conversions and checks on them
     if(argc != ARGS+1)
     {
-        cout << "genTree sqrt(s) threshold maxweight Nevents pNCS bCancel Filename" << endl;
+        cout << "BaryoGEN sqrtS threshold maxweight Nevents pNCS bCancel Filename" << endl;
         return -99;
     }
 
@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
     int iq1 = 0;
     int iq2 = 0;
     double Q2 = 0.0;
+    int NCS = 0;
     double momM = 0.0;
     double pz = 0.0;
 
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
     double minx = thr*thr/(SQRTS*SQRTS);
 
     //Init parton distribution functions
-    const PDF* LHApdf = mkPDF("NNPDF30_lo_as_0118",0);
+    const PDF* LHApdf = mkPDF("CT10",0);
     cout << LHApdf->xfxQ2(2, 0.5, SQRTS*SQRTS) << endl;
 
     //Initialize histograms for debugging
@@ -154,6 +155,7 @@ int main(int argc, char* argv[])
     myT->Branch("x2",&x2); 
     myT->Branch("iq1",&iq1); 
     myT->Branch("iq2",&iq2); 
+    myT->Branch("NCS",&NCS); 
     myT->Branch("Q2",&Q2); 
     myT->Branch("momM",&momM); 
 
@@ -229,6 +231,7 @@ int main(int argc, char* argv[])
         //Generate vector of outgoing fermionic configuration
         vector<particle> confBuf = confBuild.build(iq1,iq2,pNCS,bCan);
         int Nline = 0;
+        NCS = confBuf[0].pid/fabs(confBuf[0].pid);
         for(int i = 0; i < confBuf.size(); i++)
         {
             masses[i] = confBuf[i].mass;
