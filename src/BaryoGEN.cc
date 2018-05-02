@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
     //Init output files
     TFile *myF = new TFile((ofName+".root").c_str(),"RECREATE","Holds daughters from sphaleron decay");
-    LHEWriter lheF(ofName);
+    LHEWriter lheF(ofName, SQRTS);
 
     double minx = thr*thr/(SQRTS*SQRTS);
 
@@ -213,12 +213,12 @@ int main(int argc, char* argv[])
         particle partBuf = partBase->getParticle(iq1);
         if(iq1 != partBuf.pid) cout << "iq1 = " << iq1 << " != partBuf.pid = " << partBuf.pid << endl;
         partBuf.color = 501;
-        partBuf.p4v.SetXYZM(0.0,0.0,x1*6500,partBuf.mass);
+        partBuf.p4v.SetXYZM(0.0,0.0,x1*SQRTS/2.0,partBuf.mass);
         inParts.push_back(partBuf); //Push first incoming quark
 
         partBuf = partBase->getParticle(iq2);
         partBuf.color = 502;
-        partBuf.p4v.SetXYZM(0.0,0.0,x2*(-6500),partBuf.mass);
+        partBuf.p4v.SetXYZM(0.0,0.0,x2*SQRTS/-2.0,partBuf.mass);
         inParts.push_back(partBuf); //Push second incoming quark
 
         int colNow = 503;//This is used to keep track of the color line numbers already used
@@ -237,8 +237,8 @@ int main(int argc, char* argv[])
             masses[i] = confBuf[i].mass;
         }
 
-        u1.SetXYZM(0.0,0.0,x1*6500,UQ_MASS);
-        u2.SetXYZM(0.0,0.0,x2*(-6500),UQ_MASS);
+        u1.SetXYZM(0.0,0.0,x1*SQRTS/2.0,inParts[0].mass);
+        u2.SetXYZM(0.0,0.0,x2*SQRTS/-2.0,inParts[1].mass);
         mom = u1 + u2;
         momM = mom.M();
         pz = mom.Pz();

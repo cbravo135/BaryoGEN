@@ -3,7 +3,7 @@
 #include <math.h>
 using namespace std;
 
-LHEWriter::LHEWriter(string fName)
+LHEWriter::LHEWriter(string fName, double sqrtS)
 {
     oF.open((fName+".lhe").c_str());
     oF << std::scientific;
@@ -11,7 +11,7 @@ LHEWriter::LHEWriter(string fName)
     oF << "<header>" << endl;
     oF << "</header>" << endl;
     oF << "<init>" << endl;
-    oF << "\t2212 2212 0.65000000000e+04 0.65000000000e+04 292200 292200 292200 292200 3 1" << endl;//beam conditions information
+    oF << "\t2212 2212 " << sqrtS/2.0 << " " << sqrtS/2.0 << " 292200 292200 292200 292200 3 1" << endl;//beam conditions information
     oF << "\t7.3 1.0 1.0 7000" << endl;//sphaleron process information
     oF << "</init>" << endl;
 }

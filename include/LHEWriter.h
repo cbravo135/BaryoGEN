@@ -13,7 +13,7 @@ class LHEWriter
         ofstream oF;
 
     public:
-        LHEWriter(string fName);
+        LHEWriter(string fName, double sqrtS);
         ~LHEWriter();
 
         int writeEvent(vector<particle> outParts, double Q);
