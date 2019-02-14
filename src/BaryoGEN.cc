@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 
     //Init parton distribution functions
     const PDF* LHApdf = mkPDF("CT10",0);
-    cout << LHApdf->xfxQ2(2, 0.5, SQRTS*SQRTS) << endl;
+    //cout << LHApdf->xfxQ2(2, 0.5, SQRTS*SQRTS) << endl;
 
     //Initialize histograms for debugging
     TH1D *x1_h = new TH1D("x1_h","x1 inclusive",1000,0.0,1.0);
