@@ -63,6 +63,11 @@ int main(int argc, char* argv[])
     bool isPB = (inID0 == 2212.0);
     float SQRTS = atof(argv[3]);
     float thr = atof(argv[4]);
+    if(SQRTS < thr)
+    {
+        cout << "sqrtS must be higher than the threshold energy!" << endl;
+        return -99;
+    }
     float MCW = atof(argv[5]);
     if(MCW < 0.0)
     {
