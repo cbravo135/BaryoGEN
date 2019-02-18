@@ -3,7 +3,7 @@
 #include <math.h>
 using namespace std;
 
-LHEWriter::LHEWriter(string fName, double sqrtS)
+LHEWriter::LHEWriter(string fName, double sqrtS, int inID0, int inID1)
 {
     oF.open((fName+".lhe").c_str());
     oF << std::scientific;
@@ -11,7 +11,16 @@ LHEWriter::LHEWriter(string fName, double sqrtS)
     oF << "<header>" << endl;
     oF << "</header>" << endl;
     oF << "<init>" << endl;
-    oF << "\t2212 2212 " << sqrtS/2.0 << " " << sqrtS/2.0 << " 292200 292200 292200 292200 3 1" << endl;//beam conditions information
+    if(fabs(inID0) > 100) //This means we have proton beams
+    {
+        oF << "\t" << inID0 << " " << inID1 << " " << sqrtS/2.0 << " " 
+           << sqrtS/2.0 << " 292200 292200 292200 292200 3 1" << endl;//beam conditions information
+    }
+    else //This means we have e or mu beams
+    {
+        oF << "\t" << inID0 << " " << inID1 << " " << sqrtS/2.0 << " " 
+           << sqrtS/2.0 << " -1 -1 -1 -1 3 1" << endl;//beam conditions information
+    }
     oF << "\t7.3 1.0 1.0 7000" << endl;//sphaleron process information
     oF << "</init>" << endl;
 }
@@ -30,7 +39,15 @@ int LHEWriter::writeEvent(vector<particle> outParts, double Q)
         oF << "\t" << outParts[i].pid;
 
         if(i < 2) oF << "\t-1\t";
-        else if(fabs(outParts[i].pid) > 1000 || ( i < outParts.size() - 2 && (outParts[i].color == 501 || outParts[i].color == 502) ) ) oF << "\t2\t";
+        else if(fabs(outParts[i].pid) > 1000 || 
+                ( 
+                    i < outParts.size() - 2 && 
+                    (outParts[i].color == 501 || outParts[i].color == 502) 
+                ) 
+               ) 
+        {
+            oF << "\t2\t";
+        }
         else oF << "\t1\t";
         oF << outParts[i].m1 << "\t" << outParts[i].m2 << "\t";
 

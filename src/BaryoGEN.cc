@@ -33,33 +33,57 @@ int main(int argc, char* argv[])
     //read arguements and do conversions and checks on them
     if(argc != ARGS+1)
     {
-        cout << "BaryoGEN sqrtS threshold maxweight Nevents pNCS bCancel Filename" << endl;
+        cout << "BaryoGEN inID0 inID1 sqrtS threshold maxweight Nevents pNCS bCancel Filename" << endl;
         return -99;
     }
 
-    float SQRTS = atof(argv[1]);
-    float thr = atof(argv[2]);
-    float MCW = atof(argv[3]);
+    float inID0 = atof(argv[1]);
+    if(inID0 != 2212.0 && fabs(inID0) != 11 && fabs(inID0) != 13)
+    {
+        cout << "Only proton, electron, and muon beams supported" << endl;
+        return -99;
+    }
+    float inID1 = atof(argv[2]);
+    if(inID1 != 2212.0 && fabs(inID1) != 11 && fabs(inID1) != 13)
+    {
+        cout << "Only proton, electron, and muon beams supported" << endl;
+        return -99;
+    }
+    if(fabs(inID0) != fabs(inID1))
+    {
+        cout << "Beams must be of same species" << endl;
+        return -99;
+    }
+    if(inID0 == -2212.0 || inID1 == -2212.0)
+    {
+        cout << "No antiproton support currently, if you need it "
+             << "please email Cameron Bravo (bravo@slac.stanford.edu)" << endl;
+        return -99;
+    }
+    bool isPB = (inID0 == 2212.0);
+    float SQRTS = atof(argv[3]);
+    float thr = atof(argv[4]);
+    float MCW = atof(argv[5]);
     if(MCW < 0.0)
     {
         cout << "maxweight must be greater than zero" << endl;
         return -99;
     }
-    int Nevt = atoi(argv[4]);
-    float pNCS = atof(argv[5]);
+    int Nevt = atoi(argv[6]);
+    float pNCS = atof(argv[7]);
     if(pNCS > 1 || pNCS < 0)
     {
         cout << "pNCS must be in [0,1]" << endl;
         return -99;
     }
-    int bCancel = atoi(argv[6]);
+    int bCancel = atoi(argv[8]);
     if(bCancel < 0 || bCancel > 1)
     {
         cout << "bCancel must be 0 or 1" << endl;
         return -99;
     }
     bool bCan = bCancel;
-    string ofName = string(argv[7]);
+    string ofName = string(argv[9]);
 
     //Init structures needed during generatation
     double maxwt = 0;
@@ -94,7 +118,7 @@ int main(int argc, char* argv[])
 
     //Init output files
     TFile *myF = new TFile((ofName+".root").c_str(),"RECREATE","Holds daughters from sphaleron decay");
-    LHEWriter lheF(ofName, SQRTS);
+    LHEWriter lheF(ofName, SQRTS, int(inID0), int(inID1));
 
     double minx = thr*thr/(SQRTS*SQRTS);
 
@@ -173,53 +197,63 @@ int main(int argc, char* argv[])
         Q2 = 0.0;
         double mcP = 1.1;
         bool mcPass = false;
-        //Collide protons
-        while(!mcPass)
+        if (isPB)
         {
-            //Choose x1 and x2 in proper range
-            Q2 = 0.0;
-            while(Q2 < thr*thr)
+            //Collide protons
+            while(!mcPass)
             {
-                x1 = (1.0-minx)*rand.Uniform()+minx;
-                x2 = (1.0-minx)*rand.Uniform()+minx;
-                Q2 = x1*x2*SQRTS*SQRTS;
-            }
-            mcP = MCW*rand.Uniform();
-            double mcTot = 0.0;
-            for(int i1 = -5; i1 < 6; i1++)
-            {
-                if(i1 == 0) continue;
-                iq1 = i1;
-                double x1p = LHApdf->xfxQ2(iq1, x1, Q2)/x1;
-                for(int i2 = -5; i2 < 6; i2++)
+                //Choose x1 and x2 in proper range
+                Q2 = 0.0;
+                while(Q2 < thr*thr)
                 {
-                    if(i2 == 0) continue;
-                    iq2 = i2;
-                    //double x2p = pdf->parton(iq2,x2,SQRTS);
-                    double x2p = LHApdf->xfxQ2(iq2, x2, Q2)/x2;
-                    mcTot += x1p*x2p;
-                    if(mcTot > mcP) {mcPass = true; break;}
+                    x1 = (1.0-minx)*rand.Uniform()+minx;
+                    x2 = (1.0-minx)*rand.Uniform()+minx;
+                    Q2 = x1*x2*SQRTS*SQRTS;
                 }
-                if(mcPass) break;
+                mcP = MCW*rand.Uniform();
+                double mcTot = 0.0;
+                for(int i1 = -5; i1 < 6; i1++)
+                {
+                    if(i1 == 0) continue;
+                    iq1 = i1;
+                    double x1p = LHApdf->xfxQ2(iq1, x1, Q2)/x1;
+                    for(int i2 = -5; i2 < 6; i2++)
+                    {
+                        if(i2 == 0) continue;
+                        iq2 = i2;
+                        //double x2p = pdf->parton(iq2,x2,SQRTS);
+                        double x2p = LHApdf->xfxQ2(iq2, x2, Q2)/x2;
+                        mcTot += x1p*x2p;
+                        if(mcTot > mcP) {mcPass = true; break;}
+                    }
+                    if(mcPass) break;
+                }
+                pdfN++;
+                x1_h->Fill(x1);
+                mcTot_h->Fill(mcTot);
+                if(maxMCtot < mcTot) {maxMCtot = mcTot; cout << "Max MC Total: " << maxMCtot << endl;}
             }
-            pdfN++;
-            x1_h->Fill(x1);
-            mcTot_h->Fill(mcTot);
-            if(maxMCtot < mcTot) {maxMCtot = mcTot; cout << "Max MC Total: " << maxMCtot << endl;}
+        }
+        else
+        {
+            iq1 = int(inID0);
+            iq2 = int(inID1);
+            x1 = 1.0;
+            x2 = 1.0;
         }
 
         //Build incoming particles, sphaleron, and prepare to decay
         vector<particle> inParts;
         particle partBuf = partBase->getParticle(iq1);
         if(iq1 != partBuf.pid) cout << "iq1 = " << iq1 << " != partBuf.pid = " << partBuf.pid << endl;
-        partBuf.color = 501;
+        if(isPB) partBuf.color = 501;
         partBuf.p4v.SetXYZM(0.0,0.0,x1*SQRTS/2.0,partBuf.mass);
-        inParts.push_back(partBuf); //Push first incoming quark
+        inParts.push_back(partBuf); //Push first incoming particle
 
         partBuf = partBase->getParticle(iq2);
-        partBuf.color = 502;
+        if(isPB) partBuf.color = 502;
         partBuf.p4v.SetXYZM(0.0,0.0,x2*SQRTS/-2.0,partBuf.mass);
-        inParts.push_back(partBuf); //Push second incoming quark
+        inParts.push_back(partBuf); //Push second incoming particle
 
         int colNow = 503;//This is used to keep track of the color line numbers already used
 

@@ -138,7 +138,8 @@ vector<particle> configBuilder::build(int iQ1, int iQ2, float pNCS, bool bCancel
             {
                 specBuf = parts[i];
                 specBuf.pid = iQ1;
-                specBuf.color = 501;
+                if(iQ1 < 10) specBuf.color = 501;
+                else specBuf.color = 0;
             }
         }
         conf.push_back(specBuf);
@@ -154,7 +155,8 @@ vector<particle> configBuilder::build(int iQ1, int iQ2, float pNCS, bool bCancel
             {
                 specBuf = parts[i];
                 specBuf.pid = iQ2;
-                specBuf.color = 502;
+                if(iQ1 < 10) specBuf.color = 502;
+                else specBuf.color = 0;
             }
         }
         conf.push_back(specBuf);
