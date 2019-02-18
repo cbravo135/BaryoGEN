@@ -21,7 +21,7 @@
 #include "../include/BaryoGEN.h"
 #include "../include/LHEWriter.h"
 
-#define ARGS 7
+#define ARGS 9
 #define MPW 5.0e-7
 
 using namespace LHAPDF;
@@ -240,6 +240,7 @@ int main(int argc, char* argv[])
             iq2 = int(inID1);
             x1 = 1.0;
             x2 = 1.0;
+            Q2 = x1*x2*SQRTS*SQRTS;
         }
 
         //Build incoming particles, sphaleron, and prepare to decay
